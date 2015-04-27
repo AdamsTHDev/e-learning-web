@@ -12,13 +12,25 @@
 				<meta http-equiv="pragma" content="no-cache" />
 				<meta http-equiv="cache-control" content="no-cache" />
 				<meta http-equiv="expires" content="0" />
+				<link rel="shortcut icon" href="#{request.contextPath}/resources/image/ico/aegon.ico" />
 			</f:facet>
+			<style>
+				.wrapper {width:100%; margin:0 auto; text-align:center;}
+				.headerBox {display:block;}
+				.adamsLogo {background-image: url("#{request.contextPath}/resources/image/ADAMS_logo.png"); width:281px; height:90px;");}
+			</style>
+			<h:outputStylesheet library="css" name="global.css" />
 			<ui:insert name="head" />
 		</h:head>
 		
 		<h:body>
-			<h:outputStylesheet library="css" name="global.css" />
-			<ui:insert name="content" />
+			<h:panelGroup styleClass="wrapper">
+				<h:panelGroup styleClass="headerBox">
+					<div class="adamsLogo" style="display: inline-table;"/>
+				</h:panelGroup>
+				
+				<ui:insert name="content" />
+			</h:panelGroup>
 		</h:body>
 	</f:view>
 </html>

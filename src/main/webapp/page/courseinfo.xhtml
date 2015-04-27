@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/mainTemplate.xhtml">
+
+	<ui:define name="head">
+		<title>Main Information</title>
+		
+		<style>
+			.main-panel {width:70%;min-width:350px;margin:40px auto 0 auto;}
+			.input-width {width:250px !important;}
+		</style>
+	</ui:define>
+	
+	<ui:define name="content">
+		<h:form id="frmMain">
+			
+			<p:panel id="panelInfo" styleClass="main-panel">
+				<f:facet name="header">
+					<p:outputLabel value="Courses" style="font-size: 18px; font-weight:bold; float:left"/>
+					<p:commandLink value="Log out" style="font-size: 14px; float:right;"></p:commandLink>
+				</f:facet>
+				
+				<h:panelGroup style="display:block; width:100%;">
+					<p:selectOneMenu id="selectionCampaign" value="#{courseInfoView.selectedCampaign}" styleClass="input-width">
+						<f:selectItems value="#{courseInfoView.campaignSelection}" />
+					</p:selectOneMenu>
+				</h:panelGroup>
+				
+				<h:panelGroup style="display:block; width:100%; margin-top: 5px;">
+					<p:selectOneMenu id="selectionLevel" value="#{courseInfoView.selectedLevel}" styleClass="input-width">
+						<f:selectItems value="#{courseInfoView.levelSelection}" />
+					</p:selectOneMenu>
+				</h:panelGroup>
+				
+				<h:panelGroup style="display:block; margin-top:10px;">
+					<p:messages id="msg" autoUpdate="false" style="font-size:11px;" closable="true"/>
+					
+					<p:commandButton id="btnSubmit" value="Start" 
+						styleClass="input-width"
+						action="#{courseInfoView.proceed}" 
+						update="@form">
+					</p:commandButton>
+				</h:panelGroup>
+			</p:panel>
+			
+			
+		</h:form>
+	</ui:define>
+
+</ui:composition>

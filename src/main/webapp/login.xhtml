@@ -3,36 +3,58 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
-	template="/templates/blankTemplate.xhtml">
+	template="/templates/mainTemplate.xhtml">
 
 	<ui:define name="head">
+		<meta http-equiv="refresh" content="30" />
 		<title>Login</title>
 	</ui:define>
 	
 	<ui:define name="content">
 	<style>
-		.loginBox {width:50%;text-align:0 auto;}
+		.loginBox {width:350px;margin:40px auto 0 auto;}
+		.loginTable {width:100%;margin:0 auto;}
+		.loginTable tr, .loginTable td{border:0 none !important; border-style: none !important;}
+		
+		.bottomBox {display:block; padding-top:5px;}
+		
+		.btn-font {font-family: sans-serif !important;font-size: 13px !important;}
+		
 	</style>
 		<h:form id="frmLogin">
+				
 			<p:panel id="panelLogin" styleClass="loginBox">
-				<h:panelGrid columns="3">
-					<p:outputLabel value="#{globalMsg['common.txt.username']}" for="username"/>
-					<p:inputText id="username" value="#{loginView.username}"  required="true"/>
-					<p:message for="username"/>
+			
+				<h:panelGroup style="display:block; margin-bottom: 4px;">
+					<h:outputText value="Login" style="font-size: 20px;"/>
+				</h:panelGroup>
+			
+				<h:panelGroup style="display:block; margin-bottom: 2px;">
+					<p:inputText id="loginId" value="#{loginView.loginId}" style="width:95%;" placeholder="ID"/>
+				</h:panelGroup>
+				
+				<h:panelGroup id="panelFirstLogin" style="display:block;" rendered="#{loginView.firstLogin}">
+					<p:effect for="panelFirstLogin" type="slide" event="load">
+						<f:param name="direction" value="bottom"/>
+					</p:effect>
 					
-					<p:outputLabel value="#{globalMsg['common.txt.password']}" for="password"/>
-					<p:password id="password" value="#{loginView.password}" required="true"/>
-					<p:message for="password"/>
-				</h:panelGrid>
-				<p:commandButton id="btnSubmit" value="#{globalMsg['common.txt.btn.submit']}" 
-					actionListener="#{loginView.doLogin}" 
-					update="@form">
-				</p:commandButton>
+					<p:inputText id="firstName" value="#{loginView.firstName}" style="width:95%; margin-bottom:2px;" placeholder="First Name" />
+					<p:inputText id="lastName" value="#{loginView.lastName}" style="width:95%;" placeholder="Last Name" />
+				</h:panelGroup>
+				
+				<h:panelGroup style="display:block; margin-top: 10px;">
+					<p:messages id="loginMsg" autoUpdate="false" style="font-size:11px;" closable="true"/>
+					
+					<p:commandButton id="btnSubmit" value="Sign in" 
+						styleClass="btn-font"
+						style="width:95%;"
+						action="#{loginView.doLogin}" 
+						update="@form">
+					</p:commandButton>
+				</h:panelGroup>
 				
 			</p:panel>
-		</h:form>
-		<h:form>
-		<p:commandButton id="bb" value="SKIP to PolicyServicing" action="#{navBean.navToPolicyService}" update="@this" process="@this"/>
+				
 		</h:form>
 	</ui:define>
 
