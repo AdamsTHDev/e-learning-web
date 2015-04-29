@@ -54,28 +54,37 @@
 				
 				<h:panelGroup rendered="#{!questionView.sectionIntro}">
 				
-					<p:commandButton id="btnPrevious" value="Previous" 
+					<p:commandButton id="btnPrevious" value="Previous" icon="ui-icon-arrowthick-1-w"
 									actionListener="#{questionView.previousQuestion}" 
 									update="@form" styleClass="main-btn-width"
 									disabled="#{idxQuestion eq 0}"/>
 									
-					<p:commandButton id="btnNext" value="Next" 
+					<p:commandButton id="btnNext" value="Next" icon="ui-icon-arrowthick-1-e" iconPos="right"
 									actionListener="#{questionView.nextQuestion}" 
 									update="@form" styleClass="main-btn-width"
 									rendered="#{idxQuestion lt lastIdxQuestion}"/>
 					
-					<p:commandButton id="btnNextSection" value="Next Section"
+					<p:commandButton id="btnNextSection" value="Next Section" icon="ui-icon-arrowthickstop-1-e" iconPos="right"
 									actionListener="#{questionView.nextSection}"
-									update="@form" styleClass="main-btn-width"
-									rendered="#{idxQuestion eq lastIdxQuestion and idxSection != lastIdxSection}" />				
-									
+									update="@form"
+									styleClass="main-btn-width"
+									rendered="#{idxQuestion eq lastIdxQuestion and idxSection != lastIdxSection}" >
+						<p:confirm header="Confirmation" message="Once go to next section, you won't able to come back to this section again. Are you sure?" icon="ui-icon-alert"/>
+					</p:commandButton>
+								
 					<p:commandButton id="btSubmit" value="Finish" 
 									actionListener="#{questionView.doFinish}" 
 									rendered="#{idxSection eq lastIdxSection and idxQuestion eq lastIdxQuestion}" 
 									update="@form" styleClass="main-btn-width"/>
+					
+					
 				</h:panelGroup>
 			</h:panelGroup>
 			
+			<p:confirmDialog global="true" closeOnEscape="true" >
+				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" style="width:150px;" icon="ui-icon-check"/>
+	       		<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" style="width:150px" icon="ui-icon-close"/>
+			</p:confirmDialog>
 		</h:form>
 	</ui:define>
 

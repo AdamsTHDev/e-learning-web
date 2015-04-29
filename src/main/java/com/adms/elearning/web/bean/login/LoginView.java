@@ -3,6 +3,7 @@ package com.adms.elearning.web.bean.login;
 import java.io.IOException;
 
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
@@ -11,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.adms.common.entity.UserSession;
+import com.adms.common.entity.UserLogin;
 import com.adms.elearning.web.bean.base.BaseBean;
 import com.adms.elearning.web.util.MessageUtils;
 import com.adms.elearning.web.util.PropertyConfig;
@@ -35,6 +36,11 @@ public class LoginView extends BaseBean {
 	
 	private boolean firstLogin = false;
 	
+	private final String DEFAULT_ID = "1234567890";
+	
+	@ManagedProperty(value="#{loginSession}")
+	private LoginSession loginSession;
+	
 	private final PropertyConfig cfg = PropertyConfig.getInstance();
 	
 	public String doLogin() {
@@ -49,7 +55,7 @@ public class LoginView extends BaseBean {
 				MessageUtils.getInstance().addErrorMessage("loginMsg", "Enter your ID.");
 			} else {
 				//TODO check is first Login.
-				firstLogin = false;
+				firstLogin = !isLoginIDExisted(loginId);
 				
 				if(firstLogin) {
 					if(StringUtils.isNoneBlank(firstName) && StringUtils.isNoneBlank(lastName)) {
@@ -80,10 +86,24 @@ public class LoginView extends BaseBean {
 		if(flag) {
 //			re-direct
 			FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("username", this.loginId);
+
+			UserLogin u = new UserLogin(loginId);
+			loginSession.setUserLogin(u);
+			
 			return "page/courseinfo?faces-redirect=true";
 		} else {
 			return null;
 		}
+	}
+	
+	private boolean isLoginIDExisted(String loginId) {
+		boolean flag = false;
+		if(loginId.equals(DEFAULT_ID)) {
+			flag = true;
+		} else {
+			
+		}
+		return flag;
 	}
 	
 	public String doLogout() {
@@ -99,7 +119,7 @@ public class LoginView extends BaseBean {
 		
 		String encrypted = EncryptionUtil.getInstance().encrypt(password);
 //		System.out.println("encrypted: " + encrypted);
-		UserSession us = process(targetUrl, pathAuthen, new UserSession(loginId, encrypted));
+		UserLogin us = process(targetUrl, pathAuthen, new UserLogin(loginId, encrypted));
 		
 		if(us != null && us.getLoginSuccess().booleanValue() == true) {
 			return true;
@@ -108,20 +128,20 @@ public class LoginView extends BaseBean {
 		return false;
 	}
 	
-	private UserSession process(String target, String path, UserSession userSession) {
+	private UserLogin process(String target, String path, UserLogin userLogin) {
 		Gson gson = new GsonBuilder().create();
 		Response response = ClientBuilder.newClient()
 				.target(target)
 				.path(path)
 				.request()
-				.header("strJson", gson.toJson(userSession))
+				.header("strJson", gson.toJson(userLogin))
 				.get();
 		String resStr = response.readEntity(String.class);
 //		System.out.println("status: " + response.getStatus());
 		
 		gson = new GsonBuilder().create();
 		
-		UserSession us = gson.fromJson(resStr, UserSession.class);
+		UserLogin us = gson.fromJson(resStr, UserLogin.class);
 		return us;
 	}
 
@@ -166,5 +186,13 @@ public class LoginView extends BaseBean {
 
 	public void setFirstLogin(boolean firstLogin) {
 		this.firstLogin = firstLogin;
+	}
+
+	public LoginSession getLoginSession() {
+		return loginSession;
+	}
+
+	public void setLoginSession(LoginSession loginSession) {
+		this.loginSession = loginSession;
 	}
 }

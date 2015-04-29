@@ -3,8 +3,8 @@ package com.adms.elearning.web.bean.question;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
 
@@ -154,10 +154,20 @@ public class QuestionView extends BaseBean {
 	
 	public void nextSection() {
 		if(validateQuestionAnswer()) {
-			currSectionNum++;
-			currQuestionNum = 0;
-			sectionIntro = true;
+			doNextSection();
 		}
+	}
+	
+	public void invokeAlert() {
+		System.out.println("invoked!!");
+	}
+	
+	public void doNextSection() {
+		System.out.println("Go Next Section");
+		currSectionNum++;
+		currQuestionNum = 0;
+		sectionIntro = true;
+		
 	}
 	
 	private boolean validateQuestionAnswer() {
@@ -222,5 +232,5 @@ public class QuestionView extends BaseBean {
 	public void setSectionIntro(boolean sectionIntro) {
 		this.sectionIntro = sectionIntro;
 	}
-	
+
 }
