@@ -1,13 +1,12 @@
 package com.adms.elearning.web.util;
 
-import java.io.IOException;
-
 import com.adms.utils.PropertyResource;
 
 public class PropertyConfig {
 
 	private static PropertyConfig instance;
-	private final String CONFIG_PROP_PATH = this.getClass().getClassLoader().getResource("config/config.properties").getPath();
+//	private final String CONFIG_PROP_PATH = this.getClass().getClassLoader().getResource("config/config.properties").getPath();
+	private final String CONFIG_PROP_PATH = "config/config.properties";
 	private PropertyResource prop;
 	
 	public static PropertyConfig getInstance() {
@@ -18,10 +17,10 @@ public class PropertyConfig {
 	}
 	
 	public PropertyConfig() {
-		prop = new PropertyResource(CONFIG_PROP_PATH);
+		prop = PropertyResource.getInstance(CONFIG_PROP_PATH);
 	}
 	
-	public String getValue(String name) throws IOException {
+	public String getValue(String name) throws Exception {
 		return prop.getValue(name);
 	}
 	

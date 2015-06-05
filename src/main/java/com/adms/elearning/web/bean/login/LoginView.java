@@ -140,7 +140,7 @@ public class LoginView extends BaseBean {
 	}
 	
 	@SuppressWarnings("unused")
-	private boolean callAuthenService() throws IOException {
+	private boolean callAuthenService() throws Exception {
 		String targetUrl = cfg.getValue("cfg.link.service.authen");
 		String pathAuthen = cfg.getValue("cfg.link.service.authen.path.authen");
 		
