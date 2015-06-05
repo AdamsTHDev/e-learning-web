@@ -9,7 +9,7 @@ public class QuestionModel {
 	private Long questionId;
 	private String questionText;
 	private List<SelectItem> choices;
-	private String answer;
+	private Long answer;
 	
 	public QuestionModel() {
 		
@@ -27,10 +27,10 @@ public class QuestionModel {
 	public void setChoices(List<SelectItem> choices) {
 		this.choices = choices;
 	}
-	public String getAnswer() {
+	public Long getAnswer() {
 		return answer;
 	}
-	public void setAnswer(String answer) {
+	public void setAnswer(Long answer) {
 		this.answer = answer;
 	}
 

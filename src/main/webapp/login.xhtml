@@ -6,7 +6,7 @@
 	template="/templates/mainTemplate.xhtml">
 
 	<ui:define name="head">
-		<meta http-equiv="refresh" content="30" />
+		<ui:remove><meta http-equiv="refresh" content="30" /></ui:remove>
 		<title>Login</title>
 	</ui:define>
 	
@@ -25,29 +25,30 @@
 				
 			<p:panel id="panelLogin" styleClass="loginBox">
 			
-				<h:panelGroup style="display:block; margin-bottom: 4px;">
+				<h:panelGroup style="display:block; margin-bottom: 4px;text-align:center;">
 					<h:outputText value="Login" style="font-size: 20px;"/>
 				</h:panelGroup>
 			
 				<h:panelGroup style="display:block; margin-bottom: 2px;">
-					<p:inputText id="loginId" value="#{loginView.loginId}" style="width:95%;" placeholder="ID"/>
+					<p:inputText id="loginId" value="#{loginView.loginId}" placeholder="#{globalMsg['common.txt.id']}" 
+					maxlength="13"
+					style="width:95%;">
+						<f:validator validatorId="com.adms.elearning.web.validation.CitizenValidator"></f:validator>
+					</p:inputText>
+					
 				</h:panelGroup>
 				
 				<h:panelGroup id="panelFirstLogin" style="display:block;" rendered="#{loginView.firstLogin}">
-					<p:effect for="panelFirstLogin" type="slide" event="load">
-						<f:param name="direction" value="bottom"/>
-					</p:effect>
-					
-					<p:inputText id="firstName" value="#{loginView.firstName}" style="width:95%; margin-bottom:2px;" placeholder="First Name" />
-					<p:inputText id="lastName" value="#{loginView.lastName}" style="width:95%;" placeholder="Last Name" />
+					<p:inputText id="firstName" value="#{loginView.firstName}" style="width:95%; margin-bottom:2px;" placeholder="#{globalMsg['common.txt.first.name']}" />
+					<p:inputText id="lastName" value="#{loginView.lastName}" style="width:95%;" placeholder="#{globalMsg['common.txt.last.name']}" />
 				</h:panelGroup>
 				
-				<h:panelGroup style="display:block; margin-top: 10px;">
-					<p:messages id="loginMsg" autoUpdate="false" style="font-size:11px;" closable="true"/>
+				<h:panelGroup style="display:block; margin-top: 10px;text-align:center;">
+					<p:messages id="loginMsg" autoUpdate="false" style="font-size:11px; text-align:left;" closable="true"/>
 					
-					<p:commandButton id="btnSubmit" value="Sign in" 
+					<p:commandButton id="btnSubmit" icon="fa fa-sign-in"
 						styleClass="btn-font"
-						style="width:95%;"
+						style="width: 50%;height:30px;"
 						action="#{loginView.doLogin}" 
 						update="@form">
 					</p:commandButton>

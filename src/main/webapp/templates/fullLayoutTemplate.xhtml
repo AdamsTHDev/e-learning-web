@@ -18,20 +18,36 @@
 				.wrapper {width:100%; margin:0 auto;}
 				.headerBox {display:block;text-align:center;}
 				.adamsLogo {background-image: url("#{request.contextPath}/resources/image/ADAMS_logo.png"); width:281px; height:90px;");}
+				
 			</style>
 			<h:outputStylesheet library="css" name="global.css" />
+			
 			<ui:insert name="head" />
 		</h:head>
 		
 		<h:body>
-			<h:panelGroup styleClass="wrapper">
-				<h:panelGroup styleClass="headerBox">
-					<div class="adamsLogo" style="display: inline-table;"/>
-				</h:panelGroup>
+			<h:form id="frmMain" >
+				<p:layout id="layoutMain" fullPage="true" style="border:0;"> 
 				
-				<ui:insert name="content" />
-				
-			</h:panelGroup>
+					<p:layoutUnit position="north" resizable="false" closable="false" collapsible="false">
+						<h:panelGroup styleClass="headerBox">
+							<div class="adamsLogo" style="display: inline-table;"/>
+						</h:panelGroup>
+					</p:layoutUnit>
+					
+					<p:layoutUnit position="west" size="250" resizable="false" closable="false" collapsible="false">
+						<ui:include src="/menu-admin.xhtml"></ui:include>
+					</p:layoutUnit>
+					
+					<p:layoutUnit position="center" resizable="false" closable="false" collapsible="false">
+						<h:panelGroup styleClass="wrapper">
+							<ui:insert name="content" />
+						</h:panelGroup>
+					</p:layoutUnit>
+					
+				</p:layout>
+			</h:form>
+			
 		</h:body>
 	</f:view>
 </html>

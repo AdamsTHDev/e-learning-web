@@ -5,13 +5,26 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.adms.elearning.entity.Course;
+import com.adms.elearning.entity.CourseEnrolment;
+import com.adms.elearning.entity.ExamLevel;
+import com.adms.elearning.entity.ExamType;
+import com.adms.elearning.entity.Student;
+import com.adms.elearning.service.CourseEnrolmentService;
+import com.adms.elearning.service.CourseService;
+import com.adms.elearning.service.ExamLevelService;
+import com.adms.elearning.service.ExamTypeService;
+import com.adms.elearning.service.StudentService;
 import com.adms.elearning.web.bean.base.BaseBean;
+import com.adms.elearning.web.bean.login.LoginSession;
 import com.adms.elearning.web.util.MessageUtils;
+import com.adms.utils.DateUtil;
 
 @ManagedBean
 @ViewScoped
@@ -25,25 +38,49 @@ public class CourseInfoView extends BaseBean {
 	private String selectedCampaign;
 	private String selectedLevel;
 	
+	@ManagedProperty(value="#{loginSession}")
+	private LoginSession loginSession;
+	
+	@ManagedProperty(value="#{courseService}")
+	private CourseService courseService;
+	
+	@ManagedProperty(value="#{examLevelService}")
+	private ExamLevelService examLevelService;
+	
+	@ManagedProperty(value="#{examTypeService}")
+	private ExamTypeService examTypeService;
+	
+	@ManagedProperty(value="#{courseEnrolmentService}")
+	private CourseEnrolmentService courseEnrolmentService;
+	
+	@ManagedProperty(value="#{studentService}")
+	private StudentService studentService;
+	
 	public CourseInfoView() {
-		selectionCampaigns = new ArrayList<>();
-		selectionLevels = new ArrayList<>();
+		
 	}
 	
 	@PostConstruct
 	private void init()	{
+		selectionCampaigns = new ArrayList<>();
+		selectionLevels = new ArrayList<>();
 
-		selectionCampaigns.add(new SelectItem("", "Campaign"));
-		selectionCampaigns.add(new SelectItem("campaign_1", "campaign 1"));
-		selectionCampaigns.add(new SelectItem("campaign_2", "campaign 2"));
-		selectionCampaigns.add(new SelectItem("campaign_3", "campaign 3"));
-		selectionCampaigns.add(new SelectItem("campaign_4", "campaign 4"));
-		selectionCampaigns.add(new SelectItem("campaign_5", "campaign 5"));
+		try {
+			selectionCampaigns.add(new SelectItem("", "Campaign"));
+			List<Course> courses = courseService.findAll();
+			for(Course course : courses) {
+				selectionCampaigns.add(new SelectItem(course.getId(), course.getCourseName()));
+			}
 
-		selectionLevels.add(new SelectItem("", "Level"));
-		selectionLevels.add(new SelectItem("TSR", "TSR"));
-		selectionLevels.add(new SelectItem("SUP", "SUP"));
-		selectionLevels.add(new SelectItem("DSM", "DSM"));
+			selectionLevels.add(new SelectItem("", "Level"));
+			List<ExamLevel> examLevels = examLevelService.findAll();
+			for(ExamLevel e : examLevels) {
+				selectionLevels.add(new SelectItem(e.getId(), e.getExamLevel()));
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public String proceed() {
@@ -52,12 +89,18 @@ public class CourseInfoView extends BaseBean {
 			
 			if(StringUtils.isNotBlank(selectedCampaign) && StringUtils.isNotBlank(selectedLevel)) {
 				flag = true;
+				loginSession.setCampaignId(selectedCampaign);
+				loginSession.setLevelId(selectedLevel);
 			} else {
-				MessageUtils.getInstance().addErrorMessage("msg", "Please, select course");
+				MessageUtils.getInstance().addErrorMessage("msg", super.getGlobalMsgValue("validate.err.course.level.empty"));
 			}
 			
 			if(flag) {
-				  
+				CourseEnrolment ce = retrieveCourseEnrolment(studentService.find(new Student(loginSession.getUserLogin().getUser())).get(0)
+						, courseService.findById(Long.parseLong(selectedCampaign))
+						, examLevelService.findById(Long.parseLong(selectedLevel))
+						, examTypeService.findAll().get(0));
+				loginSession.setCourseEnrolment(ce);
 				return "question/questions?faces-redirect=true";
 			}
 			
@@ -66,6 +109,36 @@ public class CourseInfoView extends BaseBean {
 		}
 		
 		return null;
+	}
+	
+	private CourseEnrolment retrieveCourseEnrolment(Student student, Course course, ExamLevel examLevel, ExamType examType) throws Exception {
+////		<!-- Create Criteria -->
+//		DetachedCriteria courseEnrolCriteria = DetachedCriteria.forClass(CourseEnrolment.class);
+////		<!-- Join Student -->
+//		DetachedCriteria studentCriteria = courseEnrolCriteria.createCriteria("student", JoinType.INNER_JOIN);
+//		studentCriteria.add(Restrictions.eq("id", student.getId()));
+////		<!-- join Exam Level -->
+//		DetachedCriteria examLvCriteria = courseEnrolCriteria.createCriteria("examLevel", JoinType.INNER_JOIN);
+//		examLvCriteria.add(Restrictions.eq("examLevelCode", examLevel.getExamLevelCode()));
+////		<!-- Join Exam Type -->
+//		DetachedCriteria examTypeCriteria = courseEnrolCriteria.createCriteria("examType", JoinType.INNER_JOIN);
+//		examTypeCriteria.add(Restrictions.eq("examTypeCode", examType.getExamTypeCode()));
+////		<!-- Join Course -->
+//		DetachedCriteria courseCriteria = courseEnrolCriteria.createCriteria("course", JoinType.INNER_JOIN);
+//		courseCriteria.add(Restrictions.eq("id", course.getId()));
+//		
+//		courseEnrolmentService.findByCriteria(courseEnrolCriteria);
+		
+		CourseEnrolment example = new CourseEnrolment();
+		example.setStudent(student);
+		example.setCourse(course);
+		example.setExamLevel(examLevel);
+		example.setExamType(examType);
+		example.setExamDate(DateUtil.getCurrentDate());
+		
+		example = courseEnrolmentService.add(example, SYSTEM_LOG_BY);
+		
+		return example;
 	}
 	
 	public String getSelectedCampaign() {
@@ -95,5 +168,29 @@ public class CourseInfoView extends BaseBean {
 
 	public void setLevelSelection(List<SelectItem> selectionLevels) {
 		this.selectionLevels = selectionLevels;
+	}
+
+	public void setLoginSession(LoginSession loginSession) {
+		this.loginSession = loginSession;
+	}
+	
+	public void setCourseService(CourseService courseService) {
+		this.courseService = courseService;
+	}
+
+	public void setExamLevelService(ExamLevelService examLevelService) {
+		this.examLevelService = examLevelService;
+	}
+
+	public void setCourseEnrolmentService(CourseEnrolmentService courseEnrolmentService) {
+		this.courseEnrolmentService = courseEnrolmentService;
+	}
+
+	public void setStudentService(StudentService studentService) {
+		this.studentService = studentService;
+	}
+
+	public void setExamTypeService(ExamTypeService examTypeService) {
+		this.examTypeService = examTypeService;
 	}
 }

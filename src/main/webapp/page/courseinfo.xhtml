@@ -3,6 +3,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
+	xmlns:b="http://bootsfaces.net/ui"
 	template="/templates/mainTemplate.xhtml">
 
 	<ui:define name="head">
@@ -20,34 +21,29 @@
 			<p:panel id="panelInfo" styleClass="main-panel">
 				<f:facet name="header">
 					<p:outputLabel value="Courses" style="font-size: 18px; font-weight:bold; float:left"/>
-					<ui:remove>
-					<p:commandLink value="Log out" style="font-size: 14px; float:right;"></p:commandLink>
-					</ui:remove>
 				</f:facet>
 				
-				<h:panelGroup style="display:block; width:100%;">
+				<h:panelGroup style="display:block; width:100%;text-align:center;">
 					<p:selectOneMenu id="selectionCampaign" value="#{courseInfoView.selectedCampaign}" styleClass="input-width">
 						<f:selectItems value="#{courseInfoView.campaignSelection}" />
 					</p:selectOneMenu>
 				</h:panelGroup>
 				
-				<h:panelGroup style="display:block; width:100%; margin-top: 5px;">
+				<h:panelGroup style="display:block; width:100%; margin-top: 5px;text-align:center;">
 					<p:selectOneMenu id="selectionLevel" value="#{courseInfoView.selectedLevel}" styleClass="input-width">
 						<f:selectItems value="#{courseInfoView.levelSelection}" />
 					</p:selectOneMenu>
 				</h:panelGroup>
 				
-				<h:panelGroup style="display:block; margin-top:10px;">
-					<p:messages id="msg" autoUpdate="false" style="font-size:11px;" closable="true"/>
-					
-					<p:commandButton id="btnSubmit" value="Start" 
+				<h:panelGroup style="display:block; margin-top:10px;text-align:center;">
+					<p:commandButton id="btnSubmit" value="Submit" 
 						styleClass="input-width"
 						action="#{courseInfoView.proceed}" 
 						update="@form">
 					</p:commandButton>
+					<p:messages id="msg" autoUpdate="false" style="font-size:11px; margin:0 auto; width:650px;" closable="true"/>
 				</h:panelGroup>
 			</p:panel>
-			
 			
 		</h:form>
 	</ui:define>

@@ -24,6 +24,11 @@
   </context-param>
   
   <context-param>
+    <param-name>primefaces.FONT_AWESOME</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  
+  <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>/WEB-INF/spring-config.xml</param-value>
   </context-param>
@@ -43,15 +48,40 @@
     <param-value>commons</param-value>
   </context-param>
   
-  <context-param>
-    <param-name>FIXED_LOCAL_TIMEZONE</param-name>
-    <param-value>GMT+07:00</param-value>
-  </context-param>
+  <mime-mapping>
+  	<extension>eot</extension>
+  	<mime-type>application/vnd.ms-fontobject</mime-type>
+  </mime-mapping>
   
-  <context-param>
-    <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
-    <param-value>true</param-value>
-  </context-param>
+  <mime-mapping>
+  	<extension>otf</extension>
+  	<mime-type>font/opentype</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+  	<extension>ttf</extension>
+  	<mime-type>application/x-font-ttf</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+  	<extension>woff</extension>
+  	<mime-type>application/font-woff</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+  	<extension>woff2</extension>
+  	<mime-type>application/x-font-woff2</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+  	<extension>svg</extension>
+  	<mime-type>image/svg+xml</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>ico</extension>
+    <mime-type>image/x-icon</mime-type>
+  </mime-mapping>
   
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -67,21 +97,32 @@
   
   <filter>
     <filter-name>hibernateFilter</filter-name>
-    <filter-class>
-	        org.springframework.orm.hibernate4.support.OpenSessionInViewFilter
-	    </filter-class>
+    <filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
     <init-param>
-      <param-name>sessionFactoryBeanName</param-name>
-      <param-value>sessionFactory</param-value>
+    	<param-name>sessionFactoryBeanName</param-name>
+    	<param-value>sessionFactory</param-value>
     </init-param>
     <init-param>
-      <param-name>singleSession</param-name>
-      <param-value>false</param-value>
+        <param-name>singleSession</param-name>
+        <param-value>true</param-value>
     </init-param>
   </filter>
   <filter-mapping>
     <filter-name>hibernateFilter</filter-name>
     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <filter>
+  	<filter-name>PrimeFaces FileUpload Filter</filter-name>
+  	<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+  	<init-param>
+  		<param-name>thresholdSize</param-name>
+  		<param-value>51200</param-value>
+  	</init-param>
+  </filter>
+  <filter-mapping>
+  	<filter-name>PrimeFaces FileUpload Filter</filter-name>
+  	<servlet-name>Faces Servlet</servlet-name>
   </filter-mapping>
   
   <servlet>
@@ -105,4 +146,5 @@
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>*.xhtml</url-pattern>
   </servlet-mapping>
+  
 </web-app>

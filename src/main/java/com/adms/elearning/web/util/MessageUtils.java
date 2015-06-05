@@ -58,6 +58,10 @@ public class MessageUtils {
 		getFacesContext().addMessage(clientId, facesMessage);
 	}
 	
+	public FacesMessage getErrorFacesMsg(String summary, String detail) {
+		return errorMsg(summary, detail);
+	}
+	
 //	private method
 	private FacesMessage infoMsg(String summary, String detail) {
 		return new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);

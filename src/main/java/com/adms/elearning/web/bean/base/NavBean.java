@@ -9,15 +9,4 @@ public class NavBean extends BaseBean {
 
 	private static final long serialVersionUID = 2295419786029799484L;
 
-	public String navToImportFile() {
-		return "importFile?faces-redirect=true";
-	}
-	
-	public String navToCustomer() {
-		return "customer/customer?faces-redirect=true";
-	}
-	
-	public String navToPolicyService() {
-		return "pages/policyservicing/policyservice?faces-redirect=true";
-	}
 }

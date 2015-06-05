@@ -12,7 +12,7 @@
 	<context:component-scan base-package="com.adms" />
 	<context:annotation-config />
 	<context:spring-configured />
-<!-- 	<aop:aspectj-autoproxy /> -->
+	<aop:aspectj-autoproxy />
 
 	<bean id="hijackBo" class="com.adms.common.service.aop.TimeStampIntercept">
 		<!-- configure properties of aspect here as normal -->
@@ -27,7 +27,7 @@
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="DataSource" />
 		
-		<property name="packagesToScan" value="com.adms.elearning.enity"/>
+		<property name="packagesToScan" value="com.adms.elearning.entity"/>
 		
 		<property name="hibernateProperties">
 			<props>
@@ -37,8 +37,7 @@
 		</property>
 	</bean>
 
-	<bean id="persistenceExceptionTranslationPostProcessor"
-		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 
 	<!-- Transaction Manager is defined -->
 	<bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">

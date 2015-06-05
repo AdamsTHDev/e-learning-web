@@ -1,16 +1,30 @@
 package com.adms.elearning.web.bean.question;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
-import org.apache.commons.lang3.StringUtils;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
+import com.adms.elearning.entity.Answer;
+import com.adms.elearning.entity.CourseResult;
+import com.adms.elearning.entity.Question;
+import com.adms.elearning.service.AnswerService;
+import com.adms.elearning.service.CourseResultService;
+import com.adms.elearning.service.QuestionService;
 import com.adms.elearning.web.bean.base.BaseBean;
+import com.adms.elearning.web.bean.login.LoginSession;
 import com.adms.elearning.web.model.QuestionModel;
 import com.adms.elearning.web.model.SectionModel;
 import com.adms.elearning.web.util.MessageUtils;
@@ -21,13 +35,26 @@ public class QuestionView extends BaseBean {
 
 	private static final long serialVersionUID = 6633083012737219880L;
 
-	private List<SectionModel> sections;
+	private List<SectionModel> sectionModels;
 	private int currSectionNum;
 	
-	private List<QuestionModel> questions;
 	private int currQuestionNum;
 	
 	private boolean sectionIntro;
+	
+	@ManagedProperty(value="#{loginSession}")
+	private LoginSession loginSession;
+	
+	@ManagedProperty(value="#{questionService}")
+	private QuestionService questionService;
+	
+	@ManagedProperty(value="#{answerService}")
+	private AnswerService answerService;
+	
+	@ManagedProperty(value="#{courseResultService}")
+	private CourseResultService courseResultService;
+	
+	private Map<Long, Answer> answerMap;
 	
 	public QuestionView() {
 		
@@ -35,116 +62,96 @@ public class QuestionView extends BaseBean {
 	
 	@PostConstruct
 	public void init() {
+		answerMap = new HashMap<>();
+		
 		sectionIntro = true;
 		
 		currSectionNum = 0;
-		sections = new ArrayList<>();
+		sectionModels = new ArrayList<>();
 		
-		List<QuestionModel> questions;
-		
-		SectionModel section = null;
+		SectionModel sectionModel = null;
+		List<QuestionModel> questionModels = null;
 		QuestionModel qm = null;
-		List<SelectItem> choices = null;
 
 		currQuestionNum = 0;
 		
-//		<!-- Section -->
-		section = new SectionModel();
-		section.setSectionName("Company");
-		section.setSectionDesc("Question about Company");
-		questions = new ArrayList<>();
-
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("What is full name of AEGON Thailand?");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "Aegon Direct Marketing Ltd."));
-		choices.add(new SelectItem("B", "Aegon Direct & Affinity Services Ltd."));
-		choices.add(new SelectItem("C", "Aegon Direct & Affinity Marketing Services (Thailand) Ltd."));
-		choices.add(new SelectItem("D", "None of above"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("What is Aegon Core Value?");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "Relaxing"));
-		choices.add(new SelectItem("B", "Work hard"));
-		choices.add(new SelectItem("C", "Keep going"));
-		choices.add(new SelectItem("D", "Working together"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-		section.setQuestions(questions);
-		sections.add(section);
-		
-//		<!-- Section -->
-		section = new SectionModel();
-		section.setSectionName("Life");
-		section.setSectionDesc("Question about your life");
-		questions = new ArrayList<>();
-
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("Are you hungry? ______________.");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "Just a bit"));
-		choices.add(new SelectItem("B", "Not many"));
-		choices.add(new SelectItem("C", "Not any"));
-		choices.add(new SelectItem("D", "A few"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("How many years of your working experience?");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "less than 1"));
-		choices.add(new SelectItem("B", "1 - 2 years"));
-		choices.add(new SelectItem("C", "3 - 4 years"));
-		choices.add(new SelectItem("D", "more than 4 years"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("What is the most important");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "Sleeping"));
-		choices.add(new SelectItem("B", "Eating"));
-		choices.add(new SelectItem("C", "Playing"));
-		choices.add(new SelectItem("D", "Nothing"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-		section.setQuestions(questions);
-		sections.add(section);
-		
-//		<!-- Section -->
-		section = new SectionModel();
-		section.setSectionName("Math");
-		section.setSectionDesc("Question about Mathemetic");
-		questions = new ArrayList<>();
-
-//		<!-- Question -->
-		qm = new QuestionModel();
-		qm.setQuestionText("6 - 1 x 0 + 2 / 2 = ?");
-		choices = new ArrayList<>();
-		choices.add(new SelectItem("A", "5"));
-		choices.add(new SelectItem("B", "1"));
-		choices.add(new SelectItem("C", "0"));
-		choices.add(new SelectItem("D", "2"));
-		qm.setChoices(choices);
-		questions.add(qm);
-		
-		section.setQuestions(questions);
-		sections.add(section);
+//		<!-- Initial Questions -->
+		try {
+			DetachedCriteria questionDC = DetachedCriteria.forClass(Question.class);
+			DetachedCriteria sectionDC = questionDC.createCriteria("section", JoinType.INNER_JOIN);
+			sectionDC.createCriteria("course", JoinType.INNER_JOIN).add(Restrictions.eq("id", Long.parseLong(loginSession.getCampaignId())));
+			questionDC.add(Restrictions.eq("active", "Y"));
+			
+			sectionDC.addOrder(Order.asc("sectionNo"));
+			questionDC.addOrder(Order.asc("questionNo"));
+			
+			List<Question> questions = questionService.findByCriteria(questionDC);
+			
+			if(questions == null || questions.isEmpty()) {
+				MessageUtils.getInstance().addErrorMessage(null, "ERR-001: " + super.getGlobalMsgValue("ERR.001"));
+				return;
+			}
+			
+			for(Question question : questions) {
+				if(sectionModel == null || (sectionModel != null && sectionModel.getSectionId().compareTo(question.getSection().getId()) != 0)) {
+					if(sectionModel != null) {
+						sectionModel.setQuestions(questionModels);
+						sectionModels.add(sectionModel);
+					}
+					sectionModel = new SectionModel();
+					sectionModel.setSectionId(question.getSection().getId());
+					sectionModel.setSectionName(question.getSection().getSectionName());
+					sectionModel.setSectionDesc(question.getSection().getSectionDescription());
+					
+					questionModels = new ArrayList<>();
+				}
+				
+				qm = new QuestionModel();
+				qm.setQuestionId(question.getId());
+				qm.setQuestionText(question.getQuestionText());
+				qm.setChoices(retrieveAnswerChoicesByQuestionId(question.getId()));
+				
+				questionModels.add(qm);
+			}
+			if(sectionModel != null) {
+				sectionModel.setQuestions(questionModels);
+				sectionModels.add(sectionModel);
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
+	private List<SelectItem> retrieveAnswerChoicesByQuestionId(Long questionId) throws Exception {
+		List<SelectItem> choices = new ArrayList<>();
+		
+		DetachedCriteria answerDC = DetachedCriteria.forClass(Answer.class);
+		answerDC.createCriteria("question", JoinType.INNER_JOIN).add(Restrictions.eq("id", questionId));
+		answerDC.addOrder(Order.asc("choiceLetter"));
+		List<Answer> answers = answerService.findByCriteria(answerDC);
+		
+		for(Answer a : answers) {
+			choices.add(new SelectItem(a.getId(), " " + a.getChoiceLetter() + ") " + a.getAnswerText()));
+			answerMap.put(a.getId(), a);
+		}
+		
+		return choices;
+	}
+	
 	public String doFinish() {
-		System.out.println("Finished");
+		if(validateQuestionAnswer()) {
+			try {
+				saveAnswer();
+				FacesContext.getCurrentInstance()
+					.getExternalContext()
+					.redirect(FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath() + "/page/final.jsf");
+				return "/page/thankyou.xhtml?faces-redirect=true";
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 	
@@ -154,47 +161,82 @@ public class QuestionView extends BaseBean {
 	
 	public void nextSection() {
 		if(validateQuestionAnswer()) {
-			doNextSection();
+			try {
+				saveAnswer();
+				logicNextSection();
+			} catch(Exception e) {
+				MessageUtils.getInstance().addErrorMessage(null, e.getMessage());
+				e.printStackTrace();
+			}
 		}
 	}
 	
-	public void invokeAlert() {
-		System.out.println("invoked!!");
+	public void nextQuestion() {
+		if(validateQuestionAnswer()) {
+			try {
+				saveAnswer();
+				currQuestionNum++;
+			} catch(Exception e) {
+				MessageUtils.getInstance().addErrorMessage(null, e.getMessage());
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	public void doNextSection() {
-		System.out.println("Go Next Section");
-		currSectionNum++;
-		currQuestionNum = 0;
-		sectionIntro = true;
+	public void previousQuestion() {
+		try {
+			saveAnswer();
+			currQuestionNum--;
+		} catch(Exception e) {
+			MessageUtils.getInstance().addErrorMessage(null, e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	private CourseResult saveAnswer() throws Exception {
+//		Must do before changing question process
+		CourseResult courseResult = null;
+		QuestionModel q = sectionModels.get(currSectionNum).getQuestions().get(currQuestionNum);
 		
+		if(q.getAnswer() == null) {
+			return null;
+		}
+		Answer answer = answerMap.get(q.getAnswer());
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(CourseResult.class);
+		criteria.createCriteria("courseEnrolment").add(Restrictions.eq("id", loginSession.getCourseEnrolment().getId()));
+		criteria.createCriteria("answer").add(Restrictions.eq("id", answer.getId()));
+		
+		List<CourseResult> list = courseResultService.findByCriteria(criteria);
+		if(list == null || list.isEmpty() || (list != null && list.size() == 0)) {
+			courseResult = courseResultService.add(new CourseResult(loginSession.getCourseEnrolment(), answer), SYSTEM_LOG_BY);
+		} else if(list.size() == 1) {
+			courseResult = list.get(0);
+			if(courseResult.getAnswer().getId() != answer.getId()) {
+				courseResult.setAnswer(answer);
+				courseResult = courseResultService.update(courseResult, SYSTEM_LOG_BY);
+			}
+		} else {
+			throw new Exception("Found Course Result more than 1 => CourseEnrolment ID: " + loginSession.getCourseEnrolment().getId() + " | Answer ID: " + answer.getId());
+		}
+		return courseResult;
 	}
 	
 	private boolean validateQuestionAnswer() {
-		QuestionModel q = sections.get(currSectionNum).getQuestions().get(currQuestionNum);
-		if(StringUtils.isBlank(q.getAnswer())) {
-			MessageUtils.getInstance().addErrorMessage("msg", "Please, answer the question.");
+		QuestionModel q = sectionModels.get(currSectionNum).getQuestions().get(currQuestionNum);
+//		q.setAnswer(answerId);
+		if(q.getAnswer() == null) {
+			MessageUtils.getInstance().addErrorMessage("msg", getGlobalMsgValue("validate.err.question.answer"));
 			return false;
 		}
 		return true;
 	}
 	
-	public void nextQuestion() {
-		if(validateQuestionAnswer()) {
-			currQuestionNum++;
-		}
-	}
-	
-	public void previousQuestion() {
-		currQuestionNum--;
-	}
-
-	public List<QuestionModel> getQuestions() {
-		return questions;
-	}
-
-	public void setQuestions(List<QuestionModel> questions) {
-		this.questions = questions;
+	private void logicNextSection() {
+		currSectionNum++;
+		currQuestionNum = 0;
+		sectionIntro = true;
+		
 	}
 
 	public int getCurrQuestionNum() {
@@ -205,16 +247,12 @@ public class QuestionView extends BaseBean {
 		this.currQuestionNum = currQuestionNum;
 	}
 
-	public int getQuestionSize() {
-		return questions.size();
+	public List<SectionModel> getSectionModels() {
+		return sectionModels;
 	}
 
-	public List<SectionModel> getSections() {
-		return sections;
-	}
-
-	public void setSections(List<SectionModel> sections) {
-		this.sections = sections;
+	public void setSectionModels(List<SectionModel> sectionModels) {
+		this.sectionModels = sectionModels;
 	}
 
 	public int getCurrSectionNum() {
@@ -231,6 +269,22 @@ public class QuestionView extends BaseBean {
 
 	public void setSectionIntro(boolean sectionIntro) {
 		this.sectionIntro = sectionIntro;
+	}
+
+	public void setLoginSession(LoginSession loginSession) {
+		this.loginSession = loginSession;
+	}
+	
+	public void setQuestionService(QuestionService questionService) {
+		this.questionService = questionService;
+	}
+
+	public void setAnswerService(AnswerService answerService) {
+		this.answerService = answerService;
+	}
+
+	public void setCourseResultService(CourseResultService courseResultService) {
+		this.courseResultService = courseResultService;
 	}
 
 }

@@ -1,11 +1,14 @@
 package com.adms.elearning.web.bean.login;
 
 import java.io.IOException;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIInput;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
@@ -13,6 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import com.adms.common.entity.UserLogin;
+import com.adms.elearning.entity.Student;
+import com.adms.elearning.service.StudentService;
 import com.adms.elearning.web.bean.base.BaseBean;
 import com.adms.elearning.web.util.MessageUtils;
 import com.adms.elearning.web.util.PropertyConfig;
@@ -36,12 +41,25 @@ public class LoginView extends BaseBean {
 	
 	private boolean firstLogin = false;
 	
-	private final String DEFAULT_ID = "1234567890";
+	private final int COUNT_DOWN_10 = 10;
+	private int delay;
 	
 	@ManagedProperty(value="#{loginSession}")
 	private LoginSession loginSession;
 	
+	@ManagedProperty(value="#{studentService}")
+	private StudentService studentService;
+	
 	private final PropertyConfig cfg = PropertyConfig.getInstance();
+	
+	public LoginView() {
+
+	}
+	
+	@PostConstruct
+	public void initial() {
+		delay = COUNT_DOWN_10;
+	}
 	
 	public String doLogin() {
 		boolean flag = false;
@@ -52,18 +70,21 @@ public class LoginView extends BaseBean {
 			if(StringUtils.isBlank(loginId)) {
 				flag = false;
 				((UIInput) FacesContext.getCurrentInstance().getViewRoot().findComponent("frmLogin:loginId")).setValid(false);
-				MessageUtils.getInstance().addErrorMessage("loginMsg", "Enter your ID.");
+				MessageUtils.getInstance().addErrorMessage("loginMsg", getGlobalMsgValue("validate.err.citizen.id.empty"));
 			} else {
-				//TODO check is first Login.
+//				<!-- Check, is this loginId is first time -->
 				firstLogin = !isLoginIDExisted(loginId);
 				
 				if(firstLogin) {
+//					<!-- Validate firstName & lastName are blank? -->
 					if(StringUtils.isNoneBlank(firstName) && StringUtils.isNoneBlank(lastName)) {
 						//TODO Insert to DB
-						System.out.println("username: " + loginId);
-						System.out.println("firstName: " + firstName);
-						System.out.println("lastName: " + lastName);
+						Student example = new Student();
+						example.setCitizenId(loginId);
+						example.setFirstName(firstName);
+						example.setLastName(lastName);
 						
+						studentService.add(example, SYSTEM_LOG_BY);
 						flag = true;
 					} else {
 						if(StringUtils.isBlank(firstName)) {
@@ -72,7 +93,7 @@ public class LoginView extends BaseBean {
 						if(StringUtils.isBlank(lastName)) {
 							((UIInput) FacesContext.getCurrentInstance().getViewRoot().findComponent("frmLogin:lastName")).setValid(false);
 						}
-						MessageUtils.getInstance().addErrorMessage("loginMsg", "Enter your First name & Last name.");
+						MessageUtils.getInstance().addWarnMessage("loginMsg", "Enter your First name & Last name.");
 						flag = false;
 					}
 				} else {
@@ -85,6 +106,7 @@ public class LoginView extends BaseBean {
 		
 		if(flag) {
 //			re-direct
+//			<!-- put loginId to Session -->
 			FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("username", this.loginId);
 
 			UserLogin u = new UserLogin(loginId);
@@ -96,20 +118,25 @@ public class LoginView extends BaseBean {
 		}
 	}
 	
-	private boolean isLoginIDExisted(String loginId) {
+	private boolean isLoginIDExisted(String loginId) throws Exception {
 		boolean flag = false;
-		if(loginId.equals(DEFAULT_ID)) {
-			flag = true;
-		} else {
-			
-		}
+		Student example = new Student();
+		example.setCitizenId(loginId);
+		List<Student> check = studentService.find(example);
+		if(!check.isEmpty()) flag = true;
 		return flag;
 	}
 	
-	public String doLogout() {
-		System.out.println("=== doLogout() ===");
-		FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-		return "loginPage";
+	public String doLogout() throws IOException {
+		if(delay <= 0) {
+			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			ec.invalidateSession();
+			ec.redirect(ec.getRequestContextPath() + "/login.jsf");
+			return "loginPage";
+		} else {
+			delay--;
+			return null;
+		}
 	}
 	
 	@SuppressWarnings("unused")
@@ -194,5 +221,17 @@ public class LoginView extends BaseBean {
 
 	public void setLoginSession(LoginSession loginSession) {
 		this.loginSession = loginSession;
+	}
+
+	public void setStudentService(StudentService studentService) {
+		this.studentService = studentService;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
 	}
 }
