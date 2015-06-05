@@ -1,6 +1,5 @@
 package com.adms.elearning.web.bean.base;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -40,7 +39,7 @@ public class LanguageBean implements Serializable {
 			if(StringUtils.isBlank(localeCode)) {
 				localeCode = PropertyConfig.getInstance().getValue("cfg.language.selection.th.local");
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

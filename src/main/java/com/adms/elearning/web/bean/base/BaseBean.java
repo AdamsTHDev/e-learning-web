@@ -1,6 +1,5 @@
 package com.adms.elearning.web.bean.base;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
@@ -27,7 +26,7 @@ public class BaseBean implements Serializable {
 	public BaseBean() {
 		try {
 			timeZone = TimeZone.getTimeZone(PropertyConfig.getInstance().getValue("cfg.timezone.asia.bangkok"));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
