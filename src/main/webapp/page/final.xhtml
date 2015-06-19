@@ -19,17 +19,13 @@
 		<h:form id="frmMain">
 			<p:remoteCommand actionListener="#{loginView.doLogout}" global="false" autoRun="true" delay="1000" update="@form"/>
 			
-			<h:panelGroup styleClass="main-panel" style="text-align:center;">
-				<h:panelGroup>
-					<h:outputFormat value="#{globalMsg['common.txt.thank.you.1']}"/>
-				</h:panelGroup>
-				
-				<h:panelGroup>
+			<h:panelGrid columns="1" style="margin:0 auto; text-align:center; width:300px;">
+				<h:outputFormat value="#{globalMsg['common.txt.thank.you.1']}"/>
 					<h:outputFormat value="#{globalMsg['common.txt.thank.you.2']}">
 						<f:param value="#{loginView.delay}"/>
 					</h:outputFormat>
-				</h:panelGroup>
-			</h:panelGroup>
+			</h:panelGrid>
+			
 		</h:form>
 	</ui:define>
 
