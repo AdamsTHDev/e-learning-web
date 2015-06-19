@@ -12,6 +12,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -37,61 +38,66 @@ public class QuestionView extends BaseBean {
 
 	private List<SectionModel> sectionModels;
 	private int currSectionNum;
-	
+
 	private int currQuestionNum;
-	
+
 	private boolean sectionIntro;
-	
+
 	@ManagedProperty(value="#{loginSession}")
 	private LoginSession loginSession;
-	
+
 	@ManagedProperty(value="#{questionService}")
 	private QuestionService questionService;
-	
+
 	@ManagedProperty(value="#{answerService}")
 	private AnswerService answerService;
-	
+
 	@ManagedProperty(value="#{courseResultService}")
 	private CourseResultService courseResultService;
-	
+
 	private Map<Long, Answer> answerMap;
-	
+
 	public QuestionView() {
-		
+
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		answerMap = new HashMap<>();
-		
+
 		sectionIntro = true;
-		
+
 		currSectionNum = 0;
 		sectionModels = new ArrayList<>();
-		
+
 		SectionModel sectionModel = null;
 		List<QuestionModel> questionModels = null;
 		QuestionModel qm = null;
 
 		currQuestionNum = 0;
-		
+
 //		<!-- Initial Questions -->
 		try {
 			DetachedCriteria questionDC = DetachedCriteria.forClass(Question.class);
 			DetachedCriteria sectionDC = questionDC.createCriteria("section", JoinType.INNER_JOIN);
 			sectionDC.createCriteria("course", JoinType.INNER_JOIN).add(Restrictions.eq("id", Long.parseLong(loginSession.getCampaignId())));
+
+			if(!StringUtils.isBlank(loginSession.getSectionId())) {
+				sectionDC.add(Restrictions.eq("id", Long.parseLong(loginSession.getSectionId())));
+			}
+
 			questionDC.add(Restrictions.eq("active", "Y"));
-			
+
 			sectionDC.addOrder(Order.asc("sectionNo"));
 			questionDC.addOrder(Order.asc("questionNo"));
-			
+
 			List<Question> questions = questionService.findByCriteria(questionDC);
-			
+
 			if(questions == null || questions.isEmpty()) {
 				MessageUtils.getInstance().addErrorMessage(null, "ERR-001: " + super.getGlobalMsgValue("ERR.001"));
 				return;
 			}
-			
+
 			for(Question question : questions) {
 				if(sectionModel == null || (sectionModel != null && sectionModel.getSectionId().compareTo(question.getSection().getId()) != 0)) {
 					if(sectionModel != null) {
@@ -102,44 +108,44 @@ public class QuestionView extends BaseBean {
 					sectionModel.setSectionId(question.getSection().getId());
 					sectionModel.setSectionName(question.getSection().getSectionName());
 					sectionModel.setSectionDesc(question.getSection().getSectionDescription());
-					
+
 					questionModels = new ArrayList<>();
 				}
-				
+
 				qm = new QuestionModel();
 				qm.setQuestionId(question.getId());
 				qm.setQuestionText(question.getQuestionText());
 				qm.setChoices(retrieveAnswerChoicesByQuestionId(question.getId()));
-				
+
 				questionModels.add(qm);
 			}
 			if(sectionModel != null) {
 				sectionModel.setQuestions(questionModels);
 				sectionModels.add(sectionModel);
 			}
-			
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private List<SelectItem> retrieveAnswerChoicesByQuestionId(Long questionId) throws Exception {
 		List<SelectItem> choices = new ArrayList<>();
-		
+
 		DetachedCriteria answerDC = DetachedCriteria.forClass(Answer.class);
 		answerDC.createCriteria("question", JoinType.INNER_JOIN).add(Restrictions.eq("id", questionId));
 		answerDC.addOrder(Order.asc("choiceLetter"));
 		List<Answer> answers = answerService.findByCriteria(answerDC);
-		
+
 		for(Answer a : answers) {
 			choices.add(new SelectItem(a.getId(), " " + a.getChoiceLetter() + ") " + a.getAnswerText()));
 			answerMap.put(a.getId(), a);
 		}
-		
+
 		return choices;
 	}
-	
+
 	public String doFinish() {
 		if(validateQuestionAnswer()) {
 			try {
@@ -147,18 +153,18 @@ public class QuestionView extends BaseBean {
 				FacesContext.getCurrentInstance()
 					.getExternalContext()
 					.redirect(FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath() + "/page/final.jsf");
-				return "/page/thankyou.xhtml?faces-redirect=true";
+				return "/page/final.xhtml?faces-redirect=true";
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
 		return null;
 	}
-	
+
 	public void startQuestion() {
 		sectionIntro = false;
 	}
-	
+
 	public void nextSection() {
 		if(validateQuestionAnswer()) {
 			try {
@@ -170,7 +176,7 @@ public class QuestionView extends BaseBean {
 			}
 		}
 	}
-	
+
 	public void nextQuestion() {
 		if(validateQuestionAnswer()) {
 			try {
@@ -182,7 +188,7 @@ public class QuestionView extends BaseBean {
 			}
 		}
 	}
-	
+
 	public void previousQuestion() {
 		try {
 			saveAnswer();
@@ -192,21 +198,21 @@ public class QuestionView extends BaseBean {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private CourseResult saveAnswer() throws Exception {
 //		Must do before changing question process
 		CourseResult courseResult = null;
 		QuestionModel q = sectionModels.get(currSectionNum).getQuestions().get(currQuestionNum);
-		
+
 		if(q.getAnswer() == null) {
 			return null;
 		}
 		Answer answer = answerMap.get(q.getAnswer());
-		
+
 		DetachedCriteria criteria = DetachedCriteria.forClass(CourseResult.class);
 		criteria.createCriteria("courseEnrolment").add(Restrictions.eq("id", loginSession.getCourseEnrolment().getId()));
 		criteria.createCriteria("answer").add(Restrictions.eq("id", answer.getId()));
-		
+
 		List<CourseResult> list = courseResultService.findByCriteria(criteria);
 		if(list == null || list.isEmpty() || (list != null && list.size() == 0)) {
 			courseResult = courseResultService.add(new CourseResult(loginSession.getCourseEnrolment(), answer), SYSTEM_LOG_BY);
@@ -221,7 +227,7 @@ public class QuestionView extends BaseBean {
 		}
 		return courseResult;
 	}
-	
+
 	private boolean validateQuestionAnswer() {
 		QuestionModel q = sectionModels.get(currSectionNum).getQuestions().get(currQuestionNum);
 //		q.setAnswer(answerId);
@@ -231,12 +237,12 @@ public class QuestionView extends BaseBean {
 		}
 		return true;
 	}
-	
+
 	private void logicNextSection() {
 		currSectionNum++;
 		currQuestionNum = 0;
 		sectionIntro = true;
-		
+
 	}
 
 	public int getCurrQuestionNum() {
@@ -274,7 +280,7 @@ public class QuestionView extends BaseBean {
 	public void setLoginSession(LoginSession loginSession) {
 		this.loginSession = loginSession;
 	}
-	
+
 	public void setQuestionService(QuestionService questionService) {
 		this.questionService = questionService;
 	}

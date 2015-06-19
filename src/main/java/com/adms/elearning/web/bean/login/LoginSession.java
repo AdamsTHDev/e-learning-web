@@ -12,11 +12,12 @@ import com.adms.elearning.web.bean.base.BaseBean;
 public class LoginSession extends BaseBean {
 
 	private static final long serialVersionUID = -4511395913544909376L;
-	
+
 	private UserLogin userLogin;
 	private String campaignId;
 	private String levelId;
-	
+	private String sectionId;
+
 	private CourseEnrolment courseEnrolment;
 
 	public UserLogin getUserLogin() {
@@ -50,5 +51,13 @@ public class LoginSession extends BaseBean {
 	public void setCourseEnrolment(CourseEnrolment courseEnrolment) {
 		this.courseEnrolment = courseEnrolment;
 	}
-	
+
+	public String getSectionId() {
+		return sectionId;
+	}
+
+	public void setSectionId(String sectionId) {
+		this.sectionId = sectionId;
+	}
+
 }

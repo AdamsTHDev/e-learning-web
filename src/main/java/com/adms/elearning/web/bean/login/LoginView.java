@@ -32,41 +32,41 @@ public class LoginView extends BaseBean {
 	private static final long serialVersionUID = -5671223478971772749L;
 
 	private String loginId;
-	
+
 //	reg = ^(?=.*\d).{4,8}$
 	private String password;
-	
+
 	private String firstName;
 	private String lastName;
-	
+
 	private boolean firstLogin = false;
-	
+
 	private final int COUNT_DOWN_10 = 10;
 	private int delay;
-	
+
 	@ManagedProperty(value="#{loginSession}")
 	private LoginSession loginSession;
-	
+
 	@ManagedProperty(value="#{studentService}")
 	private StudentService studentService;
-	
+
 	private final PropertyConfig cfg = PropertyConfig.getInstance();
-	
+
 	public LoginView() {
 
 	}
-	
+
 	@PostConstruct
 	public void initial() {
 		delay = COUNT_DOWN_10;
 	}
-	
+
 	public String doLogin() {
 		boolean flag = false;
 		try {
 //			TODO Authentication Method
 //			flag = callAuthenService();
-			
+
 			if(StringUtils.isBlank(loginId)) {
 				flag = false;
 				((UIInput) FacesContext.getCurrentInstance().getViewRoot().findComponent("frmLogin:loginId")).setValid(false);
@@ -74,7 +74,7 @@ public class LoginView extends BaseBean {
 			} else {
 //				<!-- Check, is this loginId is first time -->
 				firstLogin = !isLoginIDExisted(loginId);
-				
+
 				if(firstLogin) {
 //					<!-- Validate firstName & lastName are blank? -->
 					if(StringUtils.isNoneBlank(firstName) && StringUtils.isNoneBlank(lastName)) {
@@ -83,7 +83,7 @@ public class LoginView extends BaseBean {
 						example.setCitizenId(loginId);
 						example.setFirstName(firstName);
 						example.setLastName(lastName);
-						
+
 						studentService.add(example, SYSTEM_LOG_BY);
 						flag = true;
 					} else {
@@ -103,7 +103,7 @@ public class LoginView extends BaseBean {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if(flag) {
 //			re-direct
 //			<!-- put loginId to Session -->
@@ -111,13 +111,13 @@ public class LoginView extends BaseBean {
 
 			UserLogin u = new UserLogin(loginId);
 			loginSession.setUserLogin(u);
-			
+
 			return "page/courseinfo?faces-redirect=true";
 		} else {
 			return null;
 		}
 	}
-	
+
 	private boolean isLoginIDExisted(String loginId) throws Exception {
 		boolean flag = false;
 		Student example = new Student();
@@ -126,9 +126,9 @@ public class LoginView extends BaseBean {
 		if(!check.isEmpty()) flag = true;
 		return flag;
 	}
-	
+
 	public String doLogout() throws IOException {
-		if(delay <= 0) {
+		if(delay < 1) {
 			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 			ec.invalidateSession();
 			ec.redirect(ec.getRequestContextPath() + "/login.jsf");
@@ -138,23 +138,23 @@ public class LoginView extends BaseBean {
 			return null;
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private boolean callAuthenService() throws Exception {
 		String targetUrl = cfg.getValue("cfg.link.service.authen");
 		String pathAuthen = cfg.getValue("cfg.link.service.authen.path.authen");
-		
+
 		String encrypted = EncryptionUtil.getInstance().encrypt(password);
 //		System.out.println("encrypted: " + encrypted);
 		UserLogin us = process(targetUrl, pathAuthen, new UserLogin(loginId, encrypted));
-		
+
 		if(us != null && us.getLoginSuccess().booleanValue() == true) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	private UserLogin process(String target, String path, UserLogin userLogin) {
 		Gson gson = new GsonBuilder().create();
 		Response response = ClientBuilder.newClient()
@@ -165,9 +165,9 @@ public class LoginView extends BaseBean {
 				.get();
 		String resStr = response.readEntity(String.class);
 //		System.out.println("status: " + response.getStatus());
-		
+
 		gson = new GsonBuilder().create();
-		
+
 		UserLogin us = gson.fromJson(resStr, UserLogin.class);
 		return us;
 	}
