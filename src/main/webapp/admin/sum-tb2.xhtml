@@ -7,7 +7,7 @@
 	
 	<div class="menu-wrapper">
 		<div style="margin-bottom:5px;">
-			<p:commandButton value="#{msg['common.btn.txt.back']}" icon="fa fa-mail-reply" actionListener="#{summarizeView.backToByDate}" update="@('frmSummarize')"/>
+			<p:commandButton value="#{msg['common.btn.txt.back']}" icon="fa fa-mail-reply" actionListener="#{summarizeView.backToByDate}" update="frmMain:frmSummarize:mainPanel"/>
 		</div>
 		<div style="margin-left:15px;">
 			<ui:remove>
@@ -65,7 +65,7 @@
 		</p:column>
 		
 		<p:column exportable="false" styleClass="column-action">
-			<p:commandButton value="#{msg['common.btn.txt.view']}" icon="#{summarizeView.defaultIconViewDetail}" title="#{msg['common.btn.title.view']}" actionListener="#{summarizeView.onRowSelectCandidateDetail(candidate)}" update="@('frmSummarize')"/>
+			<p:commandButton value="#{msg['common.btn.txt.view']}" icon="#{summarizeView.defaultIconViewDetail}" title="#{msg['common.btn.title.view']}" actionListener="#{summarizeView.onRowSelectCandidateDetail(candidate)}" update="frmMain:frmSummarize:mainPanel"/>
 		</p:column>
 		
 	</p:dataTable>

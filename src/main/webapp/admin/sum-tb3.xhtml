@@ -7,7 +7,7 @@
 	
 	<div class="menu-wrapper" style="margin-bottom:5px;">
 		<div style="">
-			<p:commandButton value="#{msg['common.btn.txt.back']}" icon="fa fa-mail-reply" actionListener="#{summarizeView.backToCandidatesByDate}" update="@('frmSummarize')"/>
+			<p:commandButton value="#{msg['common.btn.txt.back']}" icon="fa fa-mail-reply" actionListener="#{summarizeView.backToCandidatesByDate}" update="frmMain:frmSummarize:mainPanel"/>
 		</div>
 	</div>
 	<p:dataTable id="tbCandidateDetail" widgetVar="tbDetailVar"
