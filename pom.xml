@@ -9,7 +9,7 @@
 	<properties>
 		<jsf.version>2.1.11</jsf.version>
 		<spring.version>4.0.6.RELEASE</spring.version>
-		<spring.security.version>3.2.5.RELEASE</spring.security.version>
+		<spring.security.version>4.0.1.RELEASE</spring.security.version>
 	</properties>
 
 	<repositories>
@@ -38,6 +38,20 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
@@ -76,11 +90,11 @@
 		</dependency>
 
 		<!-- Font Awesome -->
-<!-- 		<dependency> -->
-<!-- 		<groupId>org.webjars</groupId> -->
-<!-- 		<artifactId>font-awesome</artifactId> -->
-<!-- 		<version>4.3.0-2</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.webjars</groupId> -->
+		<!-- <artifactId>font-awesome</artifactId> -->
+		<!-- <version>4.3.0-2</version> -->
+		<!-- </dependency> -->
 
 		<!-- JSF -->
 		<dependency>
@@ -134,17 +148,17 @@
 
 		<!-- Spring -->
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${spring.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>spring-core</artifactId>
-					<groupId>org.springframework</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework</groupId> -->
+		<!-- <artifactId>spring-context-support</artifactId> -->
+		<!-- <version>${spring.version}</version> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <artifactId>spring-core</artifactId> -->
+		<!-- <groupId>org.springframework</groupId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -154,6 +168,10 @@
 				<exclusion>
 					<artifactId>spring-core</artifactId>
 					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-security-core</artifactId>
+					<groupId>org.springframework.security</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -166,6 +184,10 @@
 				<exclusion>
 					<artifactId>spring-core</artifactId>
 					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-security-core</artifactId>
+					<groupId>org.springframework.security</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
