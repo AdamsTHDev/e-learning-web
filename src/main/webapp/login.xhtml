@@ -29,9 +29,12 @@
 					<h:outputText value="Login" style="font-size: 20px;"/>
 				</h:panelGroup>
 			
+				<p:focus for="#{loginView.focusOn}"/>
+			
 				<h:panelGroup style="display:block; margin-bottom: 2px;">
-					<p:inputText id="loginId" value="#{loginView.loginId}" placeholder="#{globalMsg['common.txt.id']}" 
+					<p:inputText id="loginId" value="#{loginView.loginId}" placeholder="#{globalMsg['common.txt.citizen.id']}" 
 					maxlength="13"
+					valueChangeListener="#{loginView.loginIdChangeListener}"
 					style="width:95%;">
 						<f:validator validatorId="com.adms.elearning.web.validation.CitizenValidator"></f:validator>
 					</p:inputText>

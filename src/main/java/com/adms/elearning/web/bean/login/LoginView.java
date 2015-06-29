@@ -10,6 +10,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIInput;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
@@ -39,7 +40,10 @@ public class LoginView extends BaseBean {
 	private String firstName;
 	private String lastName;
 
+	private String focusOn;
+
 	private boolean firstLogin = false;
+	private boolean validateValueChange = false;
 
 	private final int COUNT_DOWN_10 = 10;
 	private int delay;
@@ -59,13 +63,31 @@ public class LoginView extends BaseBean {
 	@PostConstruct
 	public void initial() {
 		delay = COUNT_DOWN_10;
+		initLoginValue();
+		validateValueChange = false;
+	}
+
+	private void initLoginValue() {
+		loginId = null;
+		firstName = null;
+		lastName = null;
+		firstLogin = false;
+		focusOn = "loginId";
 	}
 
 	public String doLogin() {
+//		System.out.println("doLogin()");
 		boolean flag = false;
 		try {
 //			TODO Authentication Method
 //			flag = callAuthenService();
+
+			if(validateValueChange) {
+				((UIInput) FacesContext.getCurrentInstance().getViewRoot().findComponent("frmLogin:loginId")).setValid(false);
+				MessageUtils.getInstance().addErrorMessage("loginMsg", getGlobalMsgValue("validate.err.citizen.id.change"));
+				initLoginValue();
+				return null;
+			}
 
 			if(StringUtils.isBlank(loginId)) {
 				flag = false;
@@ -94,6 +116,7 @@ public class LoginView extends BaseBean {
 							((UIInput) FacesContext.getCurrentInstance().getViewRoot().findComponent("frmLogin:lastName")).setValid(false);
 						}
 						MessageUtils.getInstance().addWarnMessage("loginMsg", "Enter your First name & Last name.");
+						focusOn = "firstName";
 						flag = false;
 					}
 				} else {
@@ -125,6 +148,15 @@ public class LoginView extends BaseBean {
 		List<Student> check = studentService.find(example);
 		if(!check.isEmpty()) flag = true;
 		return flag;
+	}
+
+	public void loginIdChangeListener(ValueChangeEvent e) {
+//		System.out.println("loginIdChangeListener()");
+		if(e.getOldValue() != null) {
+			if(!e.getOldValue().toString().equals(e.getNewValue().toString())) {
+				validateValueChange = true;
+			}
+		}
 	}
 
 	public String doLogout() throws IOException {
@@ -233,5 +265,21 @@ public class LoginView extends BaseBean {
 
 	public void setDelay(int delay) {
 		this.delay = delay;
+	}
+
+	public String getFocusOn() {
+		return focusOn;
+	}
+
+	public void setFocusOn(String focusOn) {
+		this.focusOn = focusOn;
+	}
+
+	public boolean isValidateValueChange() {
+		return validateValueChange;
+	}
+
+	public void setValidateValueChange(boolean validateValueChange) {
+		this.validateValueChange = validateValueChange;
 	}
 }
