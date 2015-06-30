@@ -4,7 +4,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 	<div class="menu-wrapper" style="margin-bottom:5px;">
 		<div style="">
 			<p:commandButton value="#{msg['common.btn.txt.back']}" icon="fa fa-mail-reply" actionListener="#{summarizeView.backToCandidatesByDate}" update="frmMain:frmSummarize:mainPanel"/>
@@ -46,19 +46,19 @@
 		</p:column>
 		
 		<p:rowExpansion>
-			<p:dataTable value="#{var.results}" var="detail">
+			<p:dataTable value="#{var.results}" var="detail" >
 				
-				<p:column headerText="#{msg['tb.sub.candidate.detail.col.0']}" style="width:32px;" styleClass="txt-center">
+				<p:column headerText="#{msg['tb.sub.candidate.detail.col.0']}" style="width:32px;" styleClass="txt-center bg-color-grey">
 					<h:outputText value="#{detail.answer.question.questionNo}"/>
 				</p:column>
-				<p:column headerText="#{msg['tb.sub.candidate.detail.col.1']}">
+				<p:column headerText="#{msg['tb.sub.candidate.detail.col.1']}" styleClass="bg-color-grey">
 					<h:outputText value="#{detail.answer.question.questionText}"/>
 				</p:column>
-				<p:column headerText="#{msg['tb.sub.candidate.detail.col.3']}" styleClass="">
+				<p:column headerText="#{msg['tb.sub.candidate.detail.col.3']}" styleClass="bg-color-grey">
 					<h:outputText value="#{detail.answer.choiceLetter}) #{detail.answer.answerText}"/>
 				</p:column>
 				<p:column headerText="#{msg['tb.sub.candidate.detail.col.4']}" style="width:70px;" 
-					styleClass="txt-center #{detail.answer.answerType.answerTypeCode eq 'CORRECT_ANS' ? 'color-green' : 'color-red'}">
+					styleClass="txt-center #{detail.answer.answerType.answerTypeCode eq 'CORRECT_ANS' ? 'color-green' : 'color-red'} bg-color-grey">
 					<h:outputText value="#{detail.answer.answerType.description}"></h:outputText>
 				</p:column>
 				

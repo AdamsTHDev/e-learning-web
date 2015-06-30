@@ -3,7 +3,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
-	template="/templates/fullLayoutTemplate.xhtml">
+	template="/templates/customLayoutTemplate.xhtml">
 
 	<ui:define name="head">
 		<title>AEGON</title>
@@ -21,7 +21,7 @@
 	
 	<ui:define name="content">
 		<h:panelGroup style="display:block;text-align:center;margin-top:2em;">
-			<ui:remove><p:graphicImage value="/resources/image/aegon.png" height="300"/></ui:remove>
+			<p:graphicImage value="/resources/image/aegon.png" style="max-height:100%;max-width:30%;"/>
 		</h:panelGroup>
 	</ui:define>
 
