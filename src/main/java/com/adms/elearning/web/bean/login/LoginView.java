@@ -155,7 +155,11 @@ public class LoginView extends BaseBean {
 		if(e.getOldValue() != null) {
 			if(!e.getOldValue().toString().equals(e.getNewValue().toString())) {
 				validateValueChange = true;
+			} else {
+				validateValueChange = false;
 			}
+		} else {
+			validateValueChange = false;
 		}
 	}
 
